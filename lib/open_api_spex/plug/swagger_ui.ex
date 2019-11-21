@@ -117,7 +117,8 @@ defmodule OpenApiSpex.Plug.SwaggerUI do
           request.headers["x-csrf-token"] = "<%= csrf_token %>";
           return request;
         },
-        displayOperationId: <%= display_operation_id %>
+        displayOperationId: <%= display_operation_id %>,
+        defaultModelsExpandDepth: <%= default_models_expand_depth %>
       })
       window.ui = ui
     }
@@ -142,12 +143,13 @@ defmodule OpenApiSpex.Plug.SwaggerUI do
     opts
     |> Enum.into(%{})
     |> Map.put_new(:display_operation_id, false)
+    |> Map.put_new(:default_models_expand_depth, 1)
   end
 
   @impl Plug
-  def call(conn, %{path: path, display_operation_id: display_operation_id}) do
+  def call(conn, %{path: path, display_operation_id: display_operation_id, default_models_expand_depth: default_models_expand_depth}) do
     csrf_token = Plug.CSRFProtection.get_csrf_token()
-    html = render(path, csrf_token, display_operation_id)
+    html = render(path, csrf_token, display_operation_id, default_models_expand_depth)
 
     conn
     |> Plug.Conn.put_resp_content_type("text/html")
@@ -155,5 +157,5 @@ defmodule OpenApiSpex.Plug.SwaggerUI do
   end
 
   require EEx
-  EEx.function_from_string(:defp, :render, @html, [:path, :csrf_token, :display_operation_id])
+  EEx.function_from_string(:defp, :render, @html, [:path, :csrf_token, :display_operation_id, :default_models_expand_depth])
 end
